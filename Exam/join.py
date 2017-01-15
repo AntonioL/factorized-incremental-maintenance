@@ -30,12 +30,12 @@ def h_binary_join(r1, r2):
     #Buckets creation of the outer relation
     buckets = defaultdict(list)
     for rec in r1_rel:
-        j_attr = tuple(rec.__dict__[attr] for attr in joining_attributes)
+        j_attr = tuple(getattr(rec, attr) for attr in joining_attributes)
         buckets[j_attr].append(rec)
     #Iterate through the every record in the smaller relation
     for r2_rec in r2_rel:
         #Obtain the values of the joining attributes
-        j_attr = tuple(r2_rec.__dict__[attr] for attr in joining_attributes)
+        j_attr = tuple(getattr(r2_rec, attr) for attr in joining_attributes)
         #Check if there is match
         if j_attr in buckets:
             #There is matching bucket for the joining attribute of the inner relation
@@ -43,7 +43,7 @@ def h_binary_join(r1, r2):
             #creates a new result record
             for r1_rec in buckets[j_attr]:
                 #Make new result record
-                fields = [getattr(r1_rec, attr) if attr in r1_rec.__dict__ else getattr(r2_rec, attr) for attr in result_attributes]
+                fields = [getattr(r1_rec, attr) if hasattr(r1_rec, attr) else getattr(r2_rec, attr) for attr in result_attributes]
                 #Adds that to the result relation
                 result_relation.add(record(*fields))
     #Returns the relation holding the result
@@ -96,7 +96,7 @@ def sm_binary_join(r1, r2):
         #We have a match
         else:
             #The record to be added in the result
-            fields = [getattr(r1_rec, attr) if attr in r1_rec.__dict__ else getattr(r2_rec, attr) for attr in result_attributes]
+            fields = [getattr(r1_rec, attr) if hasattr(r1_rec, attr) else getattr(r2_rec, attr) for attr in result_attributes]
             #Update the result
             result_relation.add(record(*fields))
             #Auxiliary counter to the second relation
@@ -111,7 +111,7 @@ def sm_binary_join(r1, r2):
                 if r1_j == r2_j:
                     #Add the record to the result and increments the counter of the second relation
                     #It handles automatically duplicates as result is represented as a set
-                    fields = [getattr(r1_rec, attr) if attr in r1_rec.__dict__ else getattr(r2_rec, attr) for attr in result_attributes]
+                    fields = [getattr(r1_rec, attr) if hasattr(r1_rec, attr) else getattr(r2_rec, attr) for attr in result_attributes]
                     result_relation.add(record(*fields))
                     i += 1
                 else:
